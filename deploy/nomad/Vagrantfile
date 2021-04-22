@@ -13,7 +13,7 @@ if [ -a /usr/bin/nomad ]; then
 else
   apt-get install -y unzip
   cd /tmp
-  curl https://releases.hashicorp.com/nomad/0.5.2/nomad_0.5.2_linux_amd64.zip > nomad.zip
+  curl https://releases.hashicorp.com/nomad/0.10.5/nomad_0.10.5_linux_amd64.zip > nomad.zip
   unzip -d . nomad.zip
   chmod +x nomad
   mv nomad /usr/bin/nomad
@@ -126,27 +126,8 @@ Vagrant.configure(2) do |config|
 
   config.vm.provider "virtualbox" do |vb, override|
     override.vm.box = "ubuntu/xenial64"
-    vb.memory = "6144"
+    vb.memory = "8000"
     $interface_name = "enp0s8"
-  end
-
-  config.vm.provider :aws do |aws, override|
-    override.vm.box = "aws_dummy_box"
-    override.vm.box_url = "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"
-
-    override.ssh.username = "ubuntu"
-    override.ssh.private_key_path = "~/.ssh/nomad.pem"
-    override.nfs.functional = false
-
-    aws.ami = "ami-2830f947"
-    aws.keypair_name = "microservices-demo-nomad"
-    aws.instance_type = "m4.large"
-    aws.region = "eu-central-1"
-    aws.availability_zone = "eu-central-1a"
-    aws.security_groups = [ENV["AWS_SECURITY_GROUP_ID"]]
-    aws.subnet_id = ENV["AWS_SUBNET_ID"]
-    aws.associate_public_ip = true
-    $interface_name = "ens3"
   end
 
   config.vm.provision "shell", inline: nomad

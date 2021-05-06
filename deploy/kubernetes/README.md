@@ -15,6 +15,12 @@ The manifests for the monitoring are spread across the [manifests-monitoring](./
 
 To use them, please run `kubectl create -f <path to directory>`.
 
+For GKE - You must grant your user the ability to create roles (for prometheus) in Kubernetes by running the following command. 
+kubectl create clusterrolebinding cluster-admin-binding \
+--clusterrole cluster-admin --user [USER_ACCOUNT]
+[USER_ACCOUNT] is the user's email address:
+
+
 ### What's Included?
 
 * Sock-shop grafana dashboards

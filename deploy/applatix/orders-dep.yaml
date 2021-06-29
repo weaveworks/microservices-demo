@@ -1,0 +1,53 @@
+---
+type: container
+name: orders-container
+
+inputs: 
+  parameters:
+    tmp-volume:
+          
+container:
+  image: weaveworksdemos/orders:0.4.7
+  docker_options: "-e JAVA_OPTS='-Xms64m -Xmx128m -XX:PermSize=32m -XX:MaxPermSize=64m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom'"
+  args: ["--spring.zipkin.baseUrl=http://zipkin:9411"]
+  resources:
+    cpu_cores: 0.2 
+    mem_mib: 1024
+
+volume_mounts: 
+  - mount_path: /tmp
+    volume: "%%tmp-volume%%" 
+--- 
+type: deployment
+name: orders
+
+application:
+  name: "%%appname%%"
+deployment:
+  name: "orders"
+
+inputs:
+  parameters:
+    appname:
+      default: "sock-shop"
+    order-vol-name:
+
+volumes:
+  tmp:
+    name: "%%order-vol-name%%"
+
+scale:
+  min: 1
+
+internal_routes:
+  - name: orders
+    ports:
+      - name: "orders-port"
+        port: 80
+        target_port: 80
+
+containers:
+  - server:
+      template: orders-container
+      parameters:
+        tmp-volume: "%%volumes.tmp%%"

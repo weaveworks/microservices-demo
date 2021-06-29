@@ -1,0 +1,40 @@
+---
+type: container
+name: catalogue-container
+
+inputs:
+  parameters:
+
+container:
+  image: weaveworksdemos/catalogue:0.3.5
+  docker_options: "-e ZIPKIN=http://zipkin:9411/api/v1/spans"
+  mem_lib: 128
+  cpu_cores: 0.1
+
+---
+type: deployment
+name: catalogue
+
+application:
+  name: "%%appname%%"
+deployment:
+  name: "catalogue"
+
+inputs:
+  parameters:
+    appname:
+       default: "sock-shop"
+
+scale:
+  min: 1
+
+internal_routes:
+  - name: catalogue
+    ports:
+      - name: "catalogue-port"
+        port: 80
+        target_port: 80
+
+containers:
+  - server:
+      template: catalogue-container

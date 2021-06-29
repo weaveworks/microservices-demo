@@ -1,0 +1,44 @@
+---
+type: container
+name: front-end-container
+
+inputs:
+  parameters:
+
+container:
+  image: weaveworksdemos/front-end:0.3.12
+  docker_options: "-e SESSION_REDIS=true"
+  resources:
+    cpu_cores: 0.1
+    mem_mib: 256
+
+  
+---
+type: deployment
+name: front-end
+
+application:
+  name: "%%appname%%"
+deployment:
+  name: "front-end"
+
+inputs:
+  parameters:
+    appname:
+      default: "sock-shop"
+
+scale:
+  min: 1
+
+external_routes:
+  - name: front-end
+    dns_prefix: "sockshop"
+    target_port: 8079
+    redirect_http_to_https: true
+    ip_white_list:
+      - 0.0.0.0/0
+
+containers:
+  - server:
+      template: front-end-container
+     

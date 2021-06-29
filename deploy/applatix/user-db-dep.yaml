@@ -1,0 +1,53 @@
+---
+type: container
+name: user-db-container
+
+inputs:
+  parameters:
+    tmp-volume:
+
+container:
+  image: "weaveworksdemos/user-db:0.3.0"
+  resources:
+    mem_mib: 256
+    cpu_cores: 0.1
+
+volume_mounts:
+   - mount_path: /tmp
+     volume: "%%tmp-volume%%"
+
+---
+type: deployment
+name: user-db
+
+application:
+  name: "%%appname%%"
+deployment:
+  name: "user-db"
+
+inputs:
+  parameters:
+    appname:
+      default: "sock-shop"
+    user-db-vol-name:
+
+volumes:
+  tmp:
+    name: "%%user-db-vol-name%%"
+
+scale:
+  min: 1
+
+
+internal_routes:
+  - name: user-db
+    ports:
+      - name: mongo-port
+        port: 27017
+        target_port: 27017
+
+containers:
+  - server:
+      template: user-db-container
+      parameters:
+        tmp-volume: "%%volumes.tmp%%"

@@ -1,0 +1,41 @@
+---
+type: container
+name: catalogue-db-container
+
+inputs:
+  parameters:
+
+container:
+   image: "weaveworksdemos/catalogue-db:0.3.0"
+   docker_options: "-e MYSQL_ROOT_PASSWORD=fake_password -e MYSQL_DATABASE=socksdb"
+   mem_mib: 512
+   cpu_cores: 0.2
+
+---
+type: deployment
+name: catalogue-db
+
+application:
+  name: "%%appname%%"
+deployment:
+  name: "catalogue-db"
+
+inputs:
+  parameters:
+    appname:
+      default: "sock-shop"
+
+scale:
+  min: 1
+
+internal_routes:
+  - name: catalogue-db
+    ports:
+      - name: mysql-port
+        port: 3306
+        target_port: 3306
+
+containers:
+  - server:
+      template: catalogue-db-container
+     

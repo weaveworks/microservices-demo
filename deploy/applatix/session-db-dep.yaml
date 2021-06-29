@@ -1,0 +1,42 @@
+---
+type: container
+name: session-db-container
+
+inputs:
+  parameters:
+
+container:
+  image: "redis:alpine"
+  resources:
+    mem_mib: 128
+    cpu_cores: 0.1
+---
+type: deployment
+name: session-db
+
+application:
+  name: "%%appname%%"
+deployment:
+  name: "session-db"
+
+inputs:
+  parameters:
+    appname:
+      default: "sock-shop"
+
+
+scale:
+  min: 1
+
+
+internal_routes:
+  - name: session-db
+    ports:
+      - name: session-port
+        port: 6379
+        target_port: 6379
+
+containers:
+  - server:
+      template: session-db-container
+

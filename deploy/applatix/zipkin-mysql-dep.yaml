@@ -1,0 +1,41 @@
+---
+type: container
+name: zipkin-mysql-container
+
+inputs:
+  parameters:
+
+container:
+  image: openzipkin/zipkin-mysql:1.20.0
+resources:
+    cpu_cores: 0.1
+    mem_mib: 256
+
+---
+type: deployment
+name: zipkin-mysql
+
+application:
+  name: "%%appname%%"
+deployment:
+  name: "zipkin-mysql"
+
+inputs:
+  parameters:
+    appname:
+      default: "sock-shop"
+
+scale:
+  min: 1
+
+internal_routes:
+  - name: zipkin-mysql
+    ports:
+      - name: zipkin-mysql-port
+        port: 3306
+        target_port: 3306
+
+containers:
+  - server:
+      template: zipkin-mysql-container
+      parameters:

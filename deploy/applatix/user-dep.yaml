@@ -1,0 +1,43 @@
+---
+type: container
+name: user-container
+
+inputs:
+  parameters:
+
+container:
+  image: weaveworksdemos/user:0.4.4
+  docker_options: "-e ZIPKIN=http://zipkin:9411/api/v1/spans -e MONGO_HOST=user-db:27017"
+  resources:
+    cpu_cores: 0.1
+    mem_mib: 128
+
+---
+type: deployment
+name: user
+
+
+application:
+  name: "%%appname%%"
+deployment:
+  name: "user"
+
+inputs:
+  parameters:
+    appname:
+      default: "sock-shop"
+
+scale:
+  min: 1
+
+internal_routes:
+  - name: user
+    ports:
+      - name: "user-port"
+        port: 80
+        target_port: 80
+containers:
+  - server:
+      template: user-container
+      parameters:
+

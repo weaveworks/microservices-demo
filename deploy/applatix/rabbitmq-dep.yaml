@@ -1,0 +1,42 @@
+---
+type: container
+name: rabbitmq-container
+
+inputs:
+  parameters:
+
+container:
+  image: "rabbitmq:3.6.8"
+  resources:
+    mem_mib: 256
+    cpu_cores: 0.1
+
+---
+type: deployment
+name: rabbitmq
+  
+application:
+  name: "%%appname%%"
+deployment:
+  name: "rabbitmq"
+
+inputs:
+  parameters:
+    appname:
+      default: "sock-shop"
+
+scale:
+  min: 1
+
+
+internal_routes:
+  - name: rabbitmq
+    ports:
+      - name: rabbitmq-port
+        port: 5672
+        target_port: 5672
+
+containers:
+  - server:
+      template: rabbitmq-container
+

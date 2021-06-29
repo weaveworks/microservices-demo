@@ -1,0 +1,54 @@
+---
+type: container
+name: carts-container
+
+inputs:
+  parameters:
+    tmp-volume:
+
+container:
+  image: weaveworksdemos/carts:0.4.8
+  docker_options: "-e JAVA_OPTS='-Xms64m -Xmx128m -XX:PermSize=32m -XX:MaxPermSize=64m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom'"
+  args: ["--spring.zipkin.baseUrl=http://zipkin:9411"]
+  resources:
+    cpu_cores: 0.2
+    mem_mib: 512
+
+volume_mounts:
+  - mount_path: /tmp
+    volume: "%%tmp-volume%%"
+---
+type: deployment
+name: carts
+  
+
+application:
+  name: "%%appname%%"
+deployment:
+  name: "carts"
+
+inputs:
+  parameters:
+    appname:
+      default: "sock-shop"
+    cart-vol-name:
+  
+volumes:
+  tmp:
+    name: "%%cart-vol-name%%"
+
+scale:
+  min: 1
+      
+internal_routes:
+  - name: carts
+    ports:
+      - name: "carts-port"
+        port: 80
+        target_port: 80
+
+containers:
+  - server:
+      template: carts-container
+      parameters:
+        tmp-volume: "%%volumes.tmp%%"

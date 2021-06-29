@@ -1,0 +1,36 @@
+---
+type: container
+name: zipkin-cron-container
+
+inputs:
+  parameters:
+
+container:
+  image: openzipkin/zipkin-dependencies:1.4.0
+  docker_options: "-e STORAGE_TYPE=mysql -e MYSQL_HOST=zipkin-mysql -e MYSQL_USER=zipkin -e MYSQL_PASS=zipkin"
+  commands: ["crond"]
+  args: ["-f"]
+resources:
+    cpu_cores: 0.1
+    mem_mib: 128
+---
+type: deployment
+name: zipkin-cron
+
+application:
+  name: "%%appname%%"
+deployment:
+  name: "zipkin-cron"
+
+inputs:
+  parameters:
+    appname:
+      default: "zipkin"
+
+scale:
+  min: 1
+
+containers:
+  - server:
+      template: zipkin-cron-container
+      parameters:

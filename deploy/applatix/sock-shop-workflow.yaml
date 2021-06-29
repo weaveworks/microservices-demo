@@ -1,0 +1,131 @@
+---
+type: container
+name: mytest-container
+
+inputs:
+  parameters:
+    vol-cart-db:
+    vol-cart:
+    vol-orders-db:
+    vol-order:
+    vol-shipping:
+    vol-user:
+
+container:
+  image: "ubuntu"
+  command: "sleep 3000"
+  resources:
+    mem_mib: 128
+    cpu_cores: 0.1
+
+volume_mounts:
+  - mount_path: /tmp
+    volume: "%%vol-cart-db%%"
+  - mount_path: /tmp1
+    volume: "%%vol-cart%%"
+  - mount_path: /tmp2
+    volume: "%%vol-orders-db%%"
+  - mount_path: /tmp3
+    volume: "%%vol-order%%"
+  - mount_path: /tmp4
+    volume: "%%vol-shipping%%"
+  - mount_path: /tmp5
+    volume: "%%vol-user%%"
+   
+---
+type: deployment
+name: mytestsockshop
+
+application:
+  name: mytestsockshop
+deployment:
+  name: "mytestsockshop"
+
+volumes:
+  cart-db-vol-name:
+      name: "sock-shop-cart-db"
+  cart-vol-name:
+      name: "sock-shop-cart"
+  orders-db-vol-name:
+      name: "sock-shop-order-db"
+  order-vol-name:
+      name: "sock-shop-order"
+  shipping-vol-name:
+      name: "sock-shop-shipping"
+  user-db-vol-name:
+      name: "sock-shop-user-db"
+
+containers:
+  - server:
+      template: mytest-container
+      parameters:
+        vol-cart-db: "%%volumes.cart-db-vol-name%%"
+        vol-cart: "%%volumes.cart-vol-name%%"
+        vol-orders-db: "%%volumes.orders-db-vol-name%%"
+        vol-order: "%%volumes.order-vol-name%%"
+        vol-shipping: "%%volumes.shipping-vol-name%%"
+        vol-user: "%%volumes.user-db-vol-name%%"
+---
+type: workflow
+name: sock-shop-workflow
+description: This is the workflow to deploy sock-shop
+
+inputs:
+  parameters:
+    appname:
+      default: "sock-shop"
+    cart-db-vol-name:
+      default: "sock-shop-cart-db"
+    cart-vol-name:
+      default: "sock-shop-cart"
+    orders-db-vol-name:
+      default: "sock-shop-order-db"
+    order-vol-name:
+      default: "sock-shop-order"
+    shipping-vol-name:
+      default: "sock-shop-shipping"
+    user-db-vol-name:
+      default: "sock-shop-user-db"
+
+
+steps:
+#  - microservices-test:
+#        template: mytestsockshop
+  -
+    deploy-carts-db:
+        template: carts-db
+    deploy-catalogue-db:
+        template: catalogue-db
+    deploy-orders-db:
+        template: orders-db
+    deploy-queue-master:
+        template: queue-master
+    deploy-rabbitmq:
+        template: rabbitmq
+    deploy-session-db:
+        template: session-db
+    deploy-user-db:
+        template: user-db
+  -
+    deploy-user:
+        template: user
+    deploy-carts:
+        template: carts
+    deploy-catalogue:
+        template: catalogue
+    deploy-orders:
+        template: orders
+    deploy-payment:
+        template: payment
+    deploy-shipping:
+        template: shipping
+
+  - 
+    deploy-front-end:
+        template: front-end
+    deploy-zipkin-mysql:
+        template: zipkin-mysql
+    deploy-zipkin:
+        template: zipkin
+    deploy-zipkin-cron:
+        template: zipkin-cron

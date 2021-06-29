@@ -1,0 +1,50 @@
+---
+type: container
+name: zipkin-container
+
+inputs:
+  parameters:
+
+container:
+  image: openzipkin/zipkin
+  docker_options: "-e STORAGE_TYPE=mysql -e MYSQL_HOST=zipkin-mysql"
+  resources:
+    cpu_cores: 0.2
+    mem_mib: 1024
+---
+type: deployment
+name: zipkin
+
+
+application:
+  name: "%%appname%%"
+deployment:
+  name: "zipkin"
+
+inputs:
+  parameters:
+    appname:
+      default: "zipkin"
+
+scale:
+  min: 1
+
+external_routes:
+  - name: zipkin-ext
+    dns_prefix: "zipkin"
+    target_port: 9411
+    ip_white_list:
+      - 0.0.0.0/0
+
+internal_routes:
+  - name: zipkin
+    ports:
+    - name: port
+      port: 9411
+      target_port: 9411
+
+containers:
+  - server:
+      template: zipkin-container
+      parameters:
+

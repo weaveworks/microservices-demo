@@ -1,0 +1,43 @@
+---
+type: container
+name: queue-master-container
+
+inputs:
+  parameters:
+
+container:
+  image: weaveworksdemos/queue-master:0.3.1
+  docker_options: "-e JAVA_OPTS='-Xms64m -Xmx128m -XX:PermSize=32m -XX:MaxPermSize=64m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom'"
+  args: ["--spring.zipkin.baseUrl=http://zipkin:9411"]
+  resources:
+    cpu_cores: 0.2
+    mem_mib: 512
+---
+type: deployment
+name: queue-master
+
+
+application:
+  name: "%%appname%%"
+deployment:
+  name: "queue-master"
+
+inputs:
+  parameters:
+    appname:
+      default: "sock-shop"
+
+scale:
+  min: 1
+
+internal_routes:
+  - name: queue-master
+    ports:
+      - name: "queue-port"
+        port: 80
+        target_port: 80
+containers:
+  - server:
+      template: queue-master-container
+      parameters:
+

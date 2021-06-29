@@ -1,0 +1,54 @@
+---
+type: container
+name: shipping-container
+
+inputs:
+  parameters:
+    tmp-volume:
+
+container:
+  image: weaveworksdemos/shipping:0.4.8
+  docker_options: "-e ZIPKIN=zipkin.zipkin.svc.cluster.local -e JAVA_OPTS='-Xms64m -Xmx128m -XX:PermSize=32m -XX:MaxPermSize=64m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom'"
+  args: ["--spring.zipkin.baseUrl=http://zipkin:9411"]
+  resources:
+    mem_mib: 512
+    cpu_cores: 0.2
+
+volume_mounts:
+   - mount_path: /tmp
+     volume: "%%tmp-volume%%"
+---
+type: deployment
+name: shipping
+
+application:
+  name: "%%appname%%"
+deployment:
+  name: "shipping"
+
+inputs:
+  parameters:
+    appname:
+      default: "sock-shop"
+    shipping-vol-name:
+
+volumes:
+  tmp:
+    name: "%%shipping-vol-name%%"
+
+scale:
+  min: 1
+
+internal_routes:
+  - name: shipping
+    ports:
+      - name: "shipping-port"
+        port: 80
+        target_port: 80
+
+containers:
+  - server:
+      template: shipping-container
+      parameters:
+        tmp-volume: "%%volumes.tmp%%"
+

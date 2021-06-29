@@ -1,0 +1,52 @@
+---
+type: container
+name: orders-db-container
+
+inputs:
+  parameters:
+    tmp-volume:
+
+container:
+  image: "mongo:latest"
+  resources:
+    mem_mib: 256
+    cpu_cores: 0.1
+
+volume_mounts:
+  - mount_path: /tmp
+    volume: "%%tmp-volume%%"
+---
+type: deployment
+name: orders-db
+
+application:
+  name: "%%appname%%"
+deployment:
+  name: "orders-db"
+
+inputs:
+  parameters:
+    appname:
+      default: "sock-shop"
+    orders-db-vol-name:
+
+volumes:
+  tmp:
+    name: "%%orders-db-vol-name%%"
+
+scale:
+  min: 1
+
+
+internal_routes:
+  - name: orders-db
+    ports:
+      - name: orders-port
+        port: 27017
+        target_port: 27017
+
+containers:
+  - server:
+      template: orders-db-container
+      parameters:
+        tmp-volume: "%%volumes.tmp%%"

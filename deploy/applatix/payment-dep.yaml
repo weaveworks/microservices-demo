@@ -1,0 +1,42 @@
+---
+type: container
+name: payment-container
+
+inputs:
+  parameters:
+
+container:
+  image: weaveworksdemos/payment:0.4.3
+  docker_options: "-e ZIPKIN=http://zipkin:9411/api/v1/spans"
+  resources:
+    cpu_cores: 0.1
+    mem_mib: 128
+
+---
+type: deployment
+name: payment
+
+
+application:
+  name: "%%appname%%"
+deployment:
+  name: "payment"
+
+inputs:
+  parameters:
+    appname:
+      default: "sock-shop"
+
+scale:
+  min: 1
+
+internal_routes:
+  - name: payment
+    ports:
+      - name: "payment-port"
+        port: 80
+        target_port: 80
+containers:
+  - server:
+      template: payment-container
+

@@ -2,10 +2,10 @@ version: '2'
 
 services:
   elasticsearch:
-    image: elasticsearch
+    image: elasticsearch:5
     hostname: elasticsearch
   kibana:
-    image: kibana
+    image: kibana:5
     hostname: kibana
     depends_on:
       - elasticsearch

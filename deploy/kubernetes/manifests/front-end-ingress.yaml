@@ -1,0 +1,9 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: front-end-ingress
+  namespace: sock-shop
+spec:
+  backend:
+    serviceName: front-end
+    servicePort: 80
